@@ -1,6 +1,5 @@
 import type { Config } from 'tailwindcss'
 
-// Palette tirée du logo ovale ZAREY + coloris des tees
 export default {
   content: ['./app/**/*.{vue,ts}', './shared/**/*.ts'],
   theme: {

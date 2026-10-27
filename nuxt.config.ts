@@ -36,12 +36,10 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    // Secrets serveur uniquement : NUXT_STRIPE_SECRET_KEY / NUXT_STRIPE_WEBHOOK_SECRET
     stripeSecretKey: '',
     stripeWebhookSecret: '',
     public: {
-      // URL canonique du site (NUXT_PUBLIC_SITE_URL). Sert aux redirections Stripe :
-      // jamais dérivée de l'en-tête Host, pour éviter l'injection d'hôte.
+      // utilisé pour les URLs de retour Stripe (on ne se fie pas au header Host)
       siteUrl: 'http://localhost:3000',
       tiktokUrl: 'https://www.tiktok.com/@zareypi',
       instagramUrl: 'https://www.instagram.com/zarey.pi/',
@@ -83,7 +81,7 @@ export default defineNuxtConfig({
     '/api/checkout': {
       security: { rateLimiter: { tokensPerInterval: 10, interval: 60000 } },
     },
-    // Le corps Stripe est vérifié par signature : pas de filtre XSS qui pourrait le réécrire
+    // body signé par Stripe, ne pas le filtrer
     '/api/webhooks/stripe': {
       security: { xssValidator: false },
     },

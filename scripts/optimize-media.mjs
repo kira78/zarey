@@ -1,5 +1,4 @@
-// Génère les médias optimisés du site (public/media) à partir des originaux dans assets/photo.
-// Usage : npm run media
+// assets/photo -> public/media (npm run media)
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { execFile } from 'node:child_process'
@@ -14,7 +13,6 @@ const PUBLIC = path.resolve('public')
 
 const src = name => path.join(SRC, `SaveTik.co_${name}.jpeg`)
 
-// Photos lifestyle : nom de sortie -> fichier source
 const photos = {
   'studio-1': src('7547400147727060246_1'),
   'studio-2': src('7547400147727060246_2'),
@@ -40,7 +38,7 @@ const photos = {
   'crew-4': src('7688823190004501792_5'),
 }
 
-// Packshots découpés dans les planches produit (1080x1350)
+// packshots découpés dans les planches produit (1080x1350)
 const sheet1 = src('7670617087013932320_1')
 const sheet2 = src('7670617087013932320_2')
 const cut = {
@@ -70,13 +68,12 @@ async function photo(name, file) {
 }
 
 async function packshot(name, [file, box]) {
-  // extract et trim dans deux pipelines séparés : sharp ne garantit pas leur ordre dans un seul
-  // Masque le logo d'en-tête de la planche, qui déborde sur les découpes du haut
+  // cache le logo de la planche qui déborde sur les découpes du haut
   const mask = { input: { create: { width: 300, height: 154, channels: 3, background: '#ffffff' } }, left: 400, top: 0 }
   const clean = await sharp(file).composite([mask]).toBuffer()
+  // extract puis trim en deux passes, sinon sharp inverse l'ordre
   const crop = await sharp(clean).extract(box).toBuffer()
   const buf = await sharp(crop).trim({ background: '#ffffff', threshold: 18 }).toBuffer()
-  // Packshot centré sur fond blanc, format 4:5
   await sharp(buf)
     .resize(880, 1100, { fit: 'contain', background: '#ffffff' })
     .webp({ quality: 82 })
@@ -95,9 +92,8 @@ async function brand() {
 
 async function video() {
   const input = path.join(SRC, 'SaveTik.co_7610137532189199648.mp4')
-  // Boucle hero : 16 s, muette, légère
+  // boucle hero : 16 s sans son
   await run(ffmpeg, ['-y', '-loglevel', 'error', '-ss', '0', '-t', '16', '-i', input, '-an', '-vf', 'scale=960:-2', '-c:v', 'libx264', '-preset', 'slow', '-crf', '30', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', path.join(OUT, 'hero-loop.mp4')])
-  // Film complet avec son
   await run(ffmpeg, ['-y', '-loglevel', 'error', '-i', input, '-vf', 'scale=1024:-2', '-c:v', 'libx264', '-preset', 'slow', '-crf', '30', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '96k', '-movflags', '+faststart', path.join(OUT, 'film.mp4')])
   await run(ffmpeg, ['-y', '-loglevel', 'error', '-ss', '1', '-i', input, '-frames:v', '1', '-vf', 'scale=1024:-2', path.join(OUT, 'hero-poster.jpg')])
   await sharp(path.join(OUT, 'hero-poster.jpg')).webp({ quality: 72 }).toFile(path.join(OUT, 'hero-poster.webp'))

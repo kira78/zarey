@@ -20,7 +20,7 @@ export const useCartStore = defineStore('cart', {
     }),
   },
   actions: {
-    /** Charge le panier depuis localStorage en revalidant chaque ligne (données non fiables). */
+    // le localStorage peut avoir été modifié à la main, on revalide
     hydrate() {
       if (this.hydrated || import.meta.server) return
       try {

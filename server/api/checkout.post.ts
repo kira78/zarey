@@ -3,7 +3,7 @@ import { checkoutBodySchema } from '#shared/cart'
 export default defineEventHandler(async (event) => {
   const { public: { siteUrl } } = useRuntimeConfig()
 
-  // Défense CSRF : la requête doit venir de notre propre origine
+  // CSRF
   const origin = getRequestHeader(event, 'origin')
   if (!origin || origin !== new URL(siteUrl).origin) {
     throw createError({ statusCode: 403, statusMessage: 'Origine refusée' })
@@ -35,7 +35,6 @@ export default defineEventHandler(async (event) => {
     return { url: session.url }
   }
   catch (err) {
-    // Ne jamais renvoyer le détail Stripe au client
     console.error('[checkout] échec création session', err instanceof Error ? err.message : err)
     throw createError({ statusCode: 502, statusMessage: 'Paiement momentanément indisponible' })
   }

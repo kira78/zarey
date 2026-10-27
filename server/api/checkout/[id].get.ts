@@ -1,4 +1,4 @@
-// Statut minimal d'une session pour la page de confirmation (aucune donnée personnelle renvoyée)
+// pour la page de confirmation, pas de données perso
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id') ?? ''
   if (!/^cs_(test|live)_[A-Za-z0-9]{10,200}$/.test(id)) {

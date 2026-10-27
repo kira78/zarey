@@ -34,7 +34,6 @@ async function checkout() {
       method: 'POST',
       body: { items: cart.items, acceptTerms: true },
     })
-    // On ne suit qu'une redirection vers Stripe
     if (!res.url.startsWith('https://checkout.stripe.com/')) throw new Error('URL inattendue')
     window.location.assign(res.url)
   }

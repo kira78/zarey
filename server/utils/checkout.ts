@@ -3,10 +3,7 @@ import { createError } from 'h3'
 import { SHIPPING, getProduct } from '#shared/catalog'
 import { type CartItem, shippingFor, subtotal } from '#shared/cart'
 
-/**
- * Construit les lignes Stripe à partir du catalogue serveur.
- * Le client n'envoie que slug / taille / quantité : prix et libellés viennent d'ici.
- */
+// Les prix viennent du catalogue, jamais du client
 export function buildLineItems(items: CartItem[], siteUrl: string): Stripe.Checkout.SessionCreateParams.LineItem[] {
   return items.map((item) => {
     const product = getProduct(item.slug)
@@ -44,7 +41,7 @@ export function buildShippingOptions(items: CartItem[]): Stripe.Checkout.Session
   }]
 }
 
-/** Résumé compact du panier pour les métadonnées Stripe (limite 500 caractères). */
+// metadata Stripe limitée à 500 caractères
 export function cartMetadata(items: CartItem[]): string {
   return items.map(i => `${i.slug}:${i.size}:${i.qty}`).join(',').slice(0, 500)
 }

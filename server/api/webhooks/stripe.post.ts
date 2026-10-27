@@ -1,7 +1,6 @@
 import type Stripe from 'stripe'
 
-// Webhook Stripe : seule source fiable pour confirmer une commande payée.
-// Configurer l'endpoint dans le dashboard Stripe avec l'événement checkout.session.completed.
+// Endpoint à déclarer dans Stripe (événement checkout.session.completed)
 export default defineEventHandler(async (event) => {
   const { stripeWebhookSecret } = useRuntimeConfig()
   if (!stripeWebhookSecret) {
@@ -25,7 +24,7 @@ export default defineEventHandler(async (event) => {
   if (stripeEvent.type === 'checkout.session.completed') {
     const session = stripeEvent.data.object
     if (session.payment_status === 'paid') {
-      // TODO marque : brancher ici la préparation de commande (email, outil logistique, stock).
+      // TODO: email de confirmation + envoi à la logistique
       console.info('[commande payée]', session.id, session.amount_total, session.metadata?.cart)
     }
   }

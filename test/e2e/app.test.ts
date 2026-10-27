@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { $fetch, fetch, setup } from '@nuxt/test-utils/e2e'
 
-// Build de production + serveur réel, sans clés Stripe (paiement "non configuré").
+// pas de clés Stripe ici : le checkout doit répondre 503
 await setup({
   rootDir: fileURLToPath(new URL('../..', import.meta.url)),
   server: true,

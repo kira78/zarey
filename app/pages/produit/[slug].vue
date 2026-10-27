@@ -32,7 +32,7 @@ useSeoMeta({
   ogImage: () => p.value.images[0],
 })
 
-// Données structurées produit (schema.org) — sérialisées par Unhead, pas de HTML brut injecté
+// schema.org Product
 useHead(() => ({
   script: [{
     type: 'application/ld+json',

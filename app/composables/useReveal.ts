@@ -1,9 +1,6 @@
 import type { Ref } from 'vue'
 
-/**
- * Anime à l'entrée dans le viewport les éléments [data-reveal] contenus dans root.
- * Sans JS ou en mouvement réduit, le contenu reste simplement visible.
- */
+// Fait apparaître les [data-reveal] au scroll
 export function useReveal(root: Ref<HTMLElement | null>) {
   onMounted(() => {
     const { $gsap, $reducedMotion } = useNuxtApp()

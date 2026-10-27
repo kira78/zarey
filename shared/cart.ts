@@ -1,8 +1,7 @@
 import { z } from 'zod'
 import { MAX_LINES, MAX_QTY_PER_LINE, PRODUCTS, SHIPPING, SIZES, getProduct } from './catalog'
 
-// Schéma d'une ligne de panier : sert à valider le localStorage côté client
-// et le corps de requête côté serveur (même contrat des deux côtés).
+// Partagé entre le client (localStorage) et l'API checkout
 export const cartItemSchema = z.object({
   slug: z.string().min(1).max(80).regex(/^[a-z0-9-]+$/),
   size: z.enum(SIZES),
@@ -18,7 +17,6 @@ export const checkoutBodySchema = z.object({
 
 export type CartItem = z.infer<typeof cartItemSchema>
 
-/** Ne garde que les lignes valides qui existent au catalogue. */
 export function sanitizeCart(raw: unknown): CartItem[] {
   const parsed = cartSchema.safeParse(raw)
   if (!parsed.success) return []
@@ -51,7 +49,7 @@ export function countItems(items: CartItem[]): number {
   return items.reduce((n, i) => n + i.qty, 0)
 }
 
-/** Sous-total en centimes, calculé uniquement depuis le catalogue. */
+// en centimes
 export function subtotal(items: CartItem[], catalog = PRODUCTS): number {
   return items.reduce((sum, i) => {
     const p = catalog.find(c => c.slug === i.slug)

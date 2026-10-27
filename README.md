@@ -1,78 +1,72 @@
-# ZAREY — boutique en ligne
+# ZAREY
 
-Site e-commerce de la marque ZAREY (Nuxt 4, SSR). Direction artistique : logo ovale jaune/rouge/bleu, esprit sticker,
-inspirée de [moblinks.fr](https://www.moblinks.fr/) (couleurs, cartes produit, panier tiroir) et
-[gassstudios.fr](https://gassstudios.fr/) (hero vidéo, intro jauge, lookbook filtrable).
+Boutique en ligne de la marque de streetwear ZAREY.
 
-## Démarrer
+Nuxt 4 (SSR) · Tailwind · GSAP + Lenis · Pinia · Stripe Checkout
+
+## Installation
 
 ```bash
 npm install
-cp .env.example .env   # puis remplir les clés Stripe de TEST
-npm run dev            # http://localhost:3000
+cp .env.example .env
+npm run dev
 ```
 
-| Commande | Rôle |
+Le site tourne sur http://localhost:3000. Sans clés Stripe, tout fonctionne sauf le paiement (l'API répond 503).
+
+## Scripts
+
+- `npm run dev` : serveur de dev
+- `npm run build` : build de prod (`node .output/server/index.mjs` pour le lancer)
+- `npm test` : tests unitaires + tests sur le build
+- `npm run test:unit` : tests unitaires seuls
+- `npm run media` : régénère `public/media` à partir des fichiers bruts de `assets/photo` (non versionnés)
+
+## Organisation
+
+```
+app/        pages, composants, store du panier
+server/     API checkout + webhook Stripe
+shared/     catalogue et logique panier, utilisés côté client et serveur
+scripts/    optimisation des images et vidéos
+test/       vitest
+```
+
+Les produits sont dans `shared/catalog.ts`. Les prix sont en centimes.
+
+## Paiement
+
+Le panier n'envoie que le produit, la taille et la quantité. Le serveur recalcule le total à partir du catalogue
+et crée une session Stripe Checkout, donc aucune donnée bancaire ne passe par le site.
+La confirmation de commande arrive par le webhook `/api/webhooks/stripe` (événement `checkout.session.completed`).
+
+Variables d'environnement :
+
+| Variable | |
 | --- | --- |
-| `npm run dev` | Serveur de développement |
-| `npm run build` puis `node .output/server/index.mjs` | Build + serveur de production |
-| `npm test` | Tests unitaires + intégration (build réel) |
-| `npm run test:unit` | Tests unitaires seuls (rapide) |
-| `npm run media` | Régénère `public/media` depuis `assets/photo` (photos WebP, packshots, vidéos) |
-
-## Architecture
-
-- `shared/catalog.ts` — catalogue produit, **source de vérité unique** (front + serveur).
-- `shared/cart.ts` — logique panier pure + schémas Zod partagés.
-- `server/api/checkout.post.ts` — crée une session Stripe Checkout.
-- `server/api/webhooks/stripe.post.ts` — confirmation de paiement signée par Stripe.
-- `app/` — pages, composants, store Pinia (`stores/cart.ts`), animations GSAP + Lenis (`plugins/motion.client.ts`).
+| `NUXT_STRIPE_SECRET_KEY` | clé secrète Stripe |
+| `NUXT_STRIPE_WEBHOOK_SECRET` | secret de signature du webhook |
+| `NUXT_PUBLIC_SITE_URL` | URL du site, sans slash final |
 
 ## Sécurité
 
-- **Prix calculés côté serveur** : le client n'envoie que `slug / taille / quantité`, validés par Zod en mode strict
-  (tout champ en trop, comme un prix injecté, est rejeté).
-- **Aucune donnée bancaire sur le site** : paiement hébergé par Stripe Checkout (PCI-DSS géré par Stripe).
-- **CSRF** : `/api/checkout` exige un en-tête `Origin` égal à `NUXT_PUBLIC_SITE_URL`.
-- **Redirections** : URLs Stripe construites depuis `NUXT_PUBLIC_SITE_URL`, jamais depuis l'en-tête `Host`.
-  Le front ne suit qu'une URL `https://checkout.stripe.com/`.
-- **Webhook** : signature vérifiée (`stripe.webhooks.constructEvent`) ; c'est la seule source fiable d'une commande payée.
-- **En-têtes** (nuxt-security) : CSP stricte avec nonce + `strict-dynamic`, `frame-ancestors 'none'`, `X-Frame-Options`,
-  `nosniff`, HSTS, Permissions-Policy, `X-Powered-By` retiré.
-- **Rate limiting** : 150 req / 5 min par IP, 10 req / min sur `/api/checkout`. Taille de requête limitée à 64 Ko.
-- **localStorage** : le panier relu est revalidé (schéma + existence au catalogue) avant usage.
-- **Secrets** : uniquement en variables d'environnement serveur (`.env` ignoré par git).
-- **Aucun script tiers**, polices auto-hébergées (@nuxt/fonts), pas de cookie de suivi.
+Headers gérés par `nuxt-security` : CSP avec nonce, protection contre l'iframe, HSTS, limite de requêtes par IP
+(plus stricte sur `/api/checkout`). Le checkout vérifie aussi l'en-tête `Origin`.
 
-`npm audit` signale des failles dans des outils de **dev/build** uniquement (`node-forge` via le serveur de dev
-`listhen`, `postcss-selector-parser` via Tailwind). Elles n'existent pas dans le serveur de production.
-Pas de correctif publié à ce jour : relancer `npm audit` avant la mise en ligne.
+## Déploiement (Netlify)
 
-## Mise en ligne : checklist
+La config est dans `netlify.toml`. Importer le repo dans Netlify, ajouter les trois variables
+d'environnement ci-dessus puis déployer.
 
-1. **Infos marque** à fournir/valider : prix (`shared/catalog.ts`), composition et grammage des tees,
-   frais et pays de livraison (`SHIPPING`), textes d'accroche.
-2. **Pages légales** : compléter les champs surlignés dans `/mentions-legales`, `/cgv`, `/confidentialite`
-   (SIRET, adresse, hébergeur, médiateur). Faire relire les CGV.
-3. **Stripe** : compte activé, clés **live** en variables d'environnement de l'hébergeur,
-   webhook `https://<domaine>/api/webhooks/stripe` sur `checkout.session.completed`.
-4. `NUXT_PUBLIC_SITE_URL=https://<domaine>` (HTTPS obligatoire).
-5. Brancher la préparation de commande dans le webhook (`TODO marque`) : email, logistique, stock.
-6. Si l'hébergement est derrière un proxy/CDN, vérifier que le rate limiter voit la vraie IP client.
+À noter : sur Netlify, la limite de requêtes est comptée par instance de fonction.
 
-## Déploiement Netlify
+## Avant l'ouverture
 
-`netlify.toml` est prêt (build `npm run build`, Node 22). Netlify détecte Nuxt et sert les pages via ses fonctions.
+- [ ] valider les prix, la composition et les frais de livraison
+- [ ] compléter les mentions légales, les CGV et la page confidentialité
+- [ ] passer les clés Stripe en live et déclarer le webhook
+- [ ] envoyer les commandes payées vers l'email / la logistique (`server/api/webhooks/stripe.post.ts`)
 
-1. Sur Netlify : *Add new site* → *Import an existing project* → choisir le dépôt GitHub.
-2. *Site configuration* → *Environment variables* : ajouter `NUXT_STRIPE_SECRET_KEY`,
-   `NUXT_STRIPE_WEBHOOK_SECRET` et `NUXT_PUBLIC_SITE_URL` (ex. `https://zarey.netlify.app`).
-3. Redéployer après chaque changement de variable.
+## Licence
 
-Limite : sur Netlify, le rate limiter garde ses compteurs en mémoire par instance de fonction.
-Il freine les abus simples mais ne remplace pas une protection au niveau CDN.
-
-## Médias
-
-Les originaux (`assets/photo`, ~41 Mo) ne sont pas versionnés. Les versions optimisées (`public/media`, WebP 800/1600 px,
-boucle hero 1 Mo, film chargé à la demande) sont générées par `npm run media`.
+© ZAREY. Code et visuels, tous droits réservés.

@@ -21,7 +21,6 @@
 }
 
 @layer components {
-  /* Bouton "sticker" ovale, inspiré du logo */
   .btn {
     @apply inline-flex min-h-[48px] cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-ink px-6 font-display text-lg uppercase tracking-wide shadow-sticker transition duration-200 ease-out;
   }

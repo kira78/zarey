@@ -4,7 +4,7 @@ useSeoMeta({ title: 'Conditions générales de vente' })
 
 <template>
   <LegalPage title="CGV">
-    <!-- Trame à faire valider : les CGV engagent juridiquement la marque -->
+    <!-- TODO: faire relire -->
     <p><mark>Version à compléter et faire valider avant ouverture de la boutique.</mark></p>
     <h2>Prix</h2>
     <p>Les prix sont indiqués en euros TTC. Les frais de livraison sont précisés avant le paiement.</p>

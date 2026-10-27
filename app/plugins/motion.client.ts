@@ -2,8 +2,6 @@ import Lenis from 'lenis'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-// Smooth scroll (Lenis) synchronisé avec GSAP ScrollTrigger.
-// Désactivé si l'utilisateur préfère réduire les animations.
 export default defineNuxtPlugin((nuxtApp) => {
   gsap.registerPlugin(ScrollTrigger)
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches

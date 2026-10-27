@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Film de marque en plein écran. La vidéo n'est chargée qu'à l'ouverture.
+// src vide tant que le dialog est fermé : la vidéo ne se télécharge qu'à l'ouverture
 const dialog = ref<HTMLDialogElement | null>(null)
 const src = ref('')
 const { $lenis } = useNuxtApp()

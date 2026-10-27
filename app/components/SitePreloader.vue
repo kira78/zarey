@@ -1,6 +1,5 @@
 <script setup lang="ts">
-// Écran d'intro façon "jauge" (clin d'œil GASS) : 1re visite de la session uniquement,
-// jamais bloquant (le contenu est déjà rendu dessous), ignoré en mouvement réduit.
+// Intro affichée une fois par session, sautée si prefers-reduced-motion
 const visible = ref(false)
 const progress = ref(0)
 

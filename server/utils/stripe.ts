@@ -2,7 +2,6 @@ import Stripe from 'stripe'
 
 let client: Stripe | null = null
 
-/** Client Stripe paresseux : renvoie 503 tant que la clé secrète n'est pas configurée. */
 export function useStripe(): Stripe {
   const { stripeSecretKey } = useRuntimeConfig()
   if (!stripeSecretKey) {

@@ -1,19 +1,16 @@
-// Catalogue produit : source de vérité unique, utilisée par le front ET par le serveur.
-// Le serveur recalcule toujours les prix à partir d'ici, jamais à partir du panier client.
-// PRIX ET INFOS MATIÈRE À CONFIRMER PAR LA MARQUE avant mise en ligne.
+// TODO: valider prix et compo avec la marque
 
 export const SIZES = ['S', 'M', 'L', 'XL', 'XXL'] as const
 export type Size = (typeof SIZES)[number]
 
 export interface Product {
   slug: string
-  /** Produits d'un même groupe = coloris d'un même modèle */
+  // même group = coloris d'un même modèle
   group: string
   name: string
   colorway: string
-  /** Couleur de la pastille de coloris */
   swatch: string
-  /** Prix TTC en centimes */
+  // TTC, en centimes
   price: number
   images: string[]
   sizes: readonly Size[]
@@ -65,7 +62,7 @@ export const PRODUCTS: Product[] = [
 export const MAX_QTY_PER_LINE = 10
 export const MAX_LINES = 20
 
-/** Livraison (centimes) — À CONFIRMER */
+// en centimes
 export const SHIPPING = {
   standard: 490,
   freeFrom: 8000,
